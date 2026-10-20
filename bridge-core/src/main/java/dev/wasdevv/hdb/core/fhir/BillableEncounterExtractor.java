@@ -99,7 +99,8 @@ public final class BillableEncounterExtractor {
                 item.hasUnitPrice() ? unitPrice.getCurrency() : null);
     }
 
-    static LocalDate toUtcDate(Date date) {
+    /** The UTC calendar day of an instant: the service date, and the day reconciliation counts it under. */
+    public static LocalDate toUtcDate(Date date) {
         return date == null ? null : date.toInstant().atZone(ZoneOffset.UTC).toLocalDate();
     }
 }

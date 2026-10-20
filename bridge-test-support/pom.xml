@@ -29,10 +29,8 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot</artifactId>
+      <!-- the parent adds junit at test scope; the extension here is main code -->
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 

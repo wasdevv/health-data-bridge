@@ -143,15 +143,16 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <!-- Mockito inline mock maker as an agent (JDK 21 warns on dynamic attach) -->
-          <argLine>@{argLine} -XX:+EnableDynamicAgentLoading</argLine>
+          <!-- Mockito inline mock maker as an agent (JDK 21 warns on dynamic attach). Tests run off UTC on
+               purpose: every service date is a UTC day, and a JVM-zone leak shows up as a wrong day. -->
+          <argLine>@{argLine} -XX:+EnableDynamicAgentLoading -Duser.timezone=America/Sao_Paulo</argLine>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
-          <argLine>@{argLine} -XX:+EnableDynamicAgentLoading</argLine>
+          <argLine>@{argLine} -XX:+EnableDynamicAgentLoading -Duser.timezone=America/Sao_Paulo</argLine>
         </configuration>
         <executions>
           <execution>
