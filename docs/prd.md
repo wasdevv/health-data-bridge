@@ -6,7 +6,15 @@
 
 ## 0. Decisões confirmadas
 
-Pendente. As quatro perguntas da seção 13 são respondidas aqui antes da Fase 0, e esta seção prevalece sobre o resto do documento.
+Esta seção prevalece sobre o resto do documento.
+
+1. **ERP alvo:** `erp-mock` genérico. Contrato de ERP brasileiro (Protheus, SAP) fica fora da v1.
+2. **Servidor FHIR:** fachada própria sobre o `RestfulServer` do HAPI (`hapi-fhir-server`), com armazenamento em PostgreSQL (`jsonb` + tabela de índice de busca). O `hapi-fhir-jpaserver-base` não entra: ele traz o próprio modelo de transação e de schema, e o outbox precisa ser gravado na **mesma transação** que o `Encounter`. Com a fachada, essa transação é nossa.
+3. **Escopo:** projeto completo, fases 0 a 8.
+4. **GeneXus:** depois de fechar o projeto Java.
+5. **Spring Boot 3.5** em vez de 3.3: a linha 3.3 saiu de suporte, e o Knowledge Hub já usa 3.5. HAPI FHIR 8.10 (Jakarta, Spring 6).
+6. **`erp-mock` guarda dados em memória.** "ERP fora" na demo e nos testes é o modo de falha `down` (503 em tudo), não `docker compose stop`, que apagaria as faturas e falsificaria a reconciliação.
+7. **Dia de reconciliação = data de `Encounter.period.start` em UTC**, que também é a `issueDate` da fatura no ERP.
 
 ---
 
