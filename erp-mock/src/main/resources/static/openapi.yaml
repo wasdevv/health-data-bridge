@@ -1,0 +1,206 @@
+openapi: 3.0.3
+info:
+  title: ERP (simulated) API
+  version: 1.0.0
+  description: |
+    Contract between health-data-bridge and the ERP. This file is the source of truth for both sides:
+    erp-mock's tests check its responses against it, and bridge-sync's contract tests check the
+    requests the bridge sends against it.
+
+    Errors always have the shape `{"error": code, "message": text}`. 4xx means the request will never
+    succeed as it is; 503 means try again later.
+servers:
+  - url: http://localhost:8090
+paths:
+  /api/invoices:
+    post:
+      operationId: createInvoice
+      summary: Issue an invoice for one encounter
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: >
+            Unique per logical invoice. A repeat with the same body returns the original invoice
+            (200, header Idempotent-Replayed true); a repeat with a different body is a 422.
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceRequest"
+      responses:
+        "201":
+          description: Invoice issued
+          headers:
+            Idempotent-Replayed:
+              schema: {type: string, enum: ["false"]}
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Invoice"}
+        "200":
+          description: Same Idempotency-Key and body as an earlier request; the original invoice
+          headers:
+            Idempotent-Replayed:
+              schema: {type: string, enum: ["true"]}
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Invoice"}
+        "400":
+          description: Idempotency-Key missing
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Error"}
+        "422":
+          description: Permanent rejection (unknown or inactive customer, amounts that do not add up, key reused)
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Error"}
+        "503":
+          description: Temporarily unavailable; retry with the same Idempotency-Key
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Error"}
+    get:
+      operationId: listInvoices
+      summary: Invoices, optionally of one issue date or one encounter (used by reconciliation)
+      parameters:
+        - name: issueDate
+          in: query
+          schema: {type: string, format: date}
+        - name: encounterId
+          in: query
+          schema: {type: string}
+      responses:
+        "200":
+          description: Invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: "#/components/schemas/Invoice"}
+        "503":
+          description: Temporarily unavailable
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Error"}
+  /api/customers:
+    get:
+      operationId: listCustomers
+      summary: Customers (insurers), oldest change first
+      parameters:
+        - $ref: "#/components/parameters/UpdatedSince"
+      responses:
+        "200":
+          description: Customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: "#/components/schemas/Customer"}
+        "503":
+          description: Temporarily unavailable
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Error"}
+  /api/locations:
+    get:
+      operationId: listLocations
+      summary: Units and cost centers, oldest change first
+      parameters:
+        - $ref: "#/components/parameters/UpdatedSince"
+      responses:
+        "200":
+          description: Locations
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: "#/components/schemas/Location"}
+        "503":
+          description: Temporarily unavailable
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Error"}
+components:
+  parameters:
+    UpdatedSince:
+      name: updatedSince
+      in: query
+      description: Inclusive. A record changed at exactly this instant is returned again, so a cursor never skips one.
+      schema: {type: string, format: date-time}
+  schemas:
+    Money:
+      type: number
+      description: BRL with 2 decimal places, rounded HALF_EVEN; line amount = quantity x unitPrice
+    InvoiceRequest:
+      type: object
+      additionalProperties: false
+      required: [encounterId, customerCode, patientReference, issueDate, currency, diagnosisCodes, lines, total]
+      properties:
+        encounterId: {type: string, minLength: 1}
+        customerCode: {type: string, minLength: 1}
+        patientReference:
+          type: string
+          pattern: "^Patient/[A-Za-z0-9\\-.]{1,64}$"
+          description: FHIR reference only. Patient name and CPF are never sent to the ERP.
+        issueDate: {type: string, format: date}
+        currency: {type: string, enum: [BRL]}
+        diagnosisCodes:
+          type: array
+          minItems: 1
+          items: {type: string, description: ICD-10 code}
+        lines:
+          type: array
+          minItems: 1
+          items: {$ref: "#/components/schemas/InvoiceLine"}
+        total: {$ref: "#/components/schemas/Money"}
+    InvoiceLine:
+      type: object
+      additionalProperties: false
+      required: [code, quantity, unitPrice, amount]
+      properties:
+        code: {type: string, minLength: 1}
+        description: {type: string, nullable: true}
+        quantity: {type: number, exclusiveMinimum: true, minimum: 0}
+        unitPrice: {type: number, minimum: 0}
+        amount: {$ref: "#/components/schemas/Money"}
+    Invoice:
+      type: object
+      required: [invoiceId, encounterId, customerCode, issueDate, currency, total, status, createdAt]
+      properties:
+        invoiceId: {type: string}
+        encounterId: {type: string}
+        customerCode: {type: string}
+        issueDate: {type: string, format: date}
+        currency: {type: string}
+        total: {type: number}
+        status: {type: string, enum: [ISSUED]}
+        createdAt: {type: string, format: date-time}
+    Customer:
+      type: object
+      required: [code, name, active, updatedAt]
+      properties:
+        code: {type: string}
+        name: {type: string}
+        taxId: {type: string, nullable: true, description: CNPJ}
+        active: {type: boolean}
+        updatedAt: {type: string, format: date-time}
+    Location:
+      type: object
+      required: [code, name, active, updatedAt]
+      properties:
+        code: {type: string}
+        name: {type: string}
+        city: {type: string, nullable: true}
+        active: {type: boolean}
+        updatedAt: {type: string, format: date-time}
+    Error:
+      type: object
+      required: [error, message]
+      properties:
+        error: {type: string}
+        message: {type: string}
