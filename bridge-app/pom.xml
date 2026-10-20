@@ -36,6 +36,11 @@
       <artifactId>bridge-test-support</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>hapi-fhir-client</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
