@@ -6,7 +6,7 @@ import java.time.Clock;
 import java.time.Duration;
 
 /**
- * Outbox gauges, read from the table on each scrape. With {@code bridge.outbox.dead.total} (a counter
+ * Outbox gauges, read from the table on each scrape. With {@code bridge.outbox.deadlettered} (a counter
  * in {@link OutboxWorker}) they answer: how far behind is delivery, and how fast are rows dying.
  */
 public final class OutboxMetrics {

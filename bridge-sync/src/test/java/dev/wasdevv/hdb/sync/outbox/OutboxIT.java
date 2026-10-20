@@ -115,7 +115,7 @@ class OutboxIT extends SyncIntegrationTest {
         assertThat(dead.status()).isEqualTo(OutboxEntry.Status.DEAD);
         assertThat(dead.attempts()).isEqualTo(3);
         assertThat(dead.lastError()).startsWith("gave up after 3 attempts: ERP 503");
-        assertThat(meters.get("bridge.outbox.dead.total").counter().count()).isPositive();
+        assertThat(meters.get("bridge.outbox.deadlettered").counter().count()).isPositive();
     }
 
     @Test

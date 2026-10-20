@@ -80,7 +80,7 @@ public class OutboxWorker implements DisposableBean {
         this.senders = Executors.newFixedThreadPool(concurrency, Thread.ofPlatform().name("outbox-sender-", 0).daemon().factory());
         this.delivered = Counter.builder("bridge.outbox.delivered").description("Invoices confirmed by the ERP").register(meters);
         this.retried = Counter.builder("bridge.outbox.retried").description("Failed attempts scheduled for retry").register(meters);
-        this.dead = Counter.builder("bridge.outbox.dead.total").description("Rows moved to the dead letter queue").register(meters);
+        this.dead = Counter.builder("bridge.outbox.deadlettered").description("Rows moved to the dead letter queue").register(meters);
     }
 
     /** Runs batches until one comes back short or makes no progress. Returns the totals. */
