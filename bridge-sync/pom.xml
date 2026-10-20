@@ -49,6 +49,17 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <!-- static/openapi.yaml: the ERP contract the client is tested against -->
+      <groupId>dev.wasdevv.hdb</groupId>
+      <artifactId>erp-mock</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>hapi-fhir-client</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.wiremock</groupId>
       <artifactId>wiremock-standalone</artifactId>
       <scope>test</scope>

@@ -44,6 +44,8 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
         <executions>
           <execution>
+            <!-- same id as the parent's execution, so this configuration replaces it instead of adding a second one -->
+            <id>repackage</id>
             <goals><goal>repackage</goal></goals>
             <!-- the plain jar stays the main artifact, so tests in other modules can depend on it -->
             <configuration><classifier>exec</classifier></configuration>
