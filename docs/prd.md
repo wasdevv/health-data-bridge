@@ -15,6 +15,7 @@ Esta seção prevalece sobre o resto do documento.
 5. **Spring Boot 3.5** em vez de 3.3: a linha 3.3 saiu de suporte, e o Knowledge Hub já usa 3.5. HAPI FHIR 8.10 (Jakarta, Spring 6).
 6. **`erp-mock` guarda dados em memória.** "ERP fora" na demo e nos testes é o modo de falha `down` (503 em tudo), não `docker compose stop`, que apagaria as faturas e falsificaria a reconciliação.
 7. **Dia de reconciliação = data de `Encounter.period.start` em UTC**, que também é a `issueDate` da fatura no ERP.
+8. **`JdbcTemplate` em vez de Spring Data JPA** (decidido na implementação): toda consulta relevante é específica do PostgreSQL (`jsonb`, `SKIP LOCKED`, `ON CONFLICT`). Ver `docs/adr/006-jdbc-em-vez-de-jpa.md`. MapStruct fica onde o formato é tipado (rascunho de fatura → requisição do ERP).
 
 ---
 

@@ -1,0 +1,47 @@
+# docker compose up --build → PostgreSQL, erp-mock on :8090, bridge on :8080 with the demo seed
+name: health-data-bridge
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: hdb
+      POSTGRES_USER: hdb
+      POSTGRES_PASSWORD: hdb
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hdb -d hdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  erp-mock:
+    build:
+      context: .
+      target: erp-mock
+    environment:
+      ERP_SEED_PLANTED_DIVERGENCE: "true"
+    ports:
+      - "8090:8090"
+
+  bridge:
+    build:
+      context: .
+      target: bridge
+    depends_on:
+      db:
+        condition: service_healthy
+      erp-mock:
+        condition: service_healthy
+    environment:
+      HDB_DB_URL: jdbc:postgresql://db:5432/hdb
+      HDB_DB_USER: hdb
+      HDB_DB_PASSWORD: hdb
+      ERP_BASE_URL: http://erp-mock:8090
+      HDB_SEED_ENABLED: "true"
+    ports:
+      - "8080:8080"
+
+volumes:
+  db-data:
