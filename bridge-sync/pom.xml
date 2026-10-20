@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>dev.wasdevv.hdb</groupId>
+    <artifactId>health-data-bridge</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>bridge-sync</artifactId>
+  <description>Outbox, worker with SKIP LOCKED, retry, circuit breaker, DLQ, reverse sync, reconciliation.</description>
+
+  <properties>
+    <jacoco.minimum>0.75</jacoco.minimum>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>dev.wasdevv.hdb</groupId>
+      <artifactId>bridge-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>dev.wasdevv.hdb</groupId>
+      <artifactId>bridge-fhir</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.github.resilience4j</groupId>
+      <artifactId>resilience4j-circuitbreaker</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.github.resilience4j</groupId>
+      <artifactId>resilience4j-micrometer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>dev.wasdevv.hdb</groupId>
+      <artifactId>bridge-test-support</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- static/openapi.yaml: the ERP contract the client is tested against -->
+      <groupId>dev.wasdevv.hdb</groupId>
+      <artifactId>erp-mock</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>hapi-fhir-client</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.wiremock</groupId>
+      <artifactId>wiremock-standalone</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.atlassian.oai</groupId>
+      <artifactId>swagger-request-validator-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+</project>

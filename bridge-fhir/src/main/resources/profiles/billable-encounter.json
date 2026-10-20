@@ -1,0 +1,65 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "billable-encounter",
+  "url": "https://health-data-bridge.example/fhir/StructureDefinition/billable-encounter",
+  "version": "0.1.0",
+  "name": "BillableEncounter",
+  "title": "Billable Encounter",
+  "status": "draft",
+  "date": "2026-10-20",
+  "publisher": "health-data-bridge (demo)",
+  "description": "An Encounter the bridge can turn into an ERP invoice: it has a patient, a start time (the invoice date, in UTC) and at least one diagnosis pointing to a Condition coded in ICD-10. The bridge validates every finished Encounter against this profile before billing it; a failure is permanent and goes to the dead letter queue.",
+  "fhirVersion": "4.0.1",
+  "kind": "resource",
+  "abstract": false,
+  "type": "Encounter",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Encounter",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Encounter",
+        "path": "Encounter"
+      },
+      {
+        "id": "Encounter.subject",
+        "path": "Encounter.subject",
+        "short": "The patient being billed for",
+        "min": 1,
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
+          }
+        ]
+      },
+      {
+        "id": "Encounter.period",
+        "path": "Encounter.period",
+        "min": 1
+      },
+      {
+        "id": "Encounter.period.start",
+        "path": "Encounter.period.start",
+        "short": "Service date: its UTC day is the invoice issue date",
+        "min": 1
+      },
+      {
+        "id": "Encounter.diagnosis",
+        "path": "Encounter.diagnosis",
+        "short": "At least one diagnosis, coded in ICD-10 on the Condition",
+        "min": 1
+      },
+      {
+        "id": "Encounter.diagnosis.condition",
+        "path": "Encounter.diagnosis.condition",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
+          }
+        ]
+      }
+    ]
+  }
+}
